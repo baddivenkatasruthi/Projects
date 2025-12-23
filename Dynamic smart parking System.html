@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dynamic Smart Parking System</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:Arial; }
+
+    body {
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      transition: 0.4s;
+    }
+
+    .page {
+      display: none;
+      min-height: 100vh;
+      padding: 20px;
+      background: rgba(0,0,0,0.65);
+      color: white;
+    }
+    .active { display: block; }
+
+    .card {
+      max-width: 500px;
+      margin: 30px auto;
+      background: rgba(0,0,0,0.75);
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border-radius: 5px;
+      border: none;
+      font-size: 14px;
+    }
+
+    button {
+      background-color: #2ecc71;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .secondary-btn {
+      background-color: #3498db;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: space-around;
+      background: rgba(0,0,0,0.9);
+      padding: 10px;
+      position: sticky;
+      top: 0;
+    }
+
+    .nav button {
+      background: transparent;
+      color: white;
+      width: auto;
+      font-size: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 60px);
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .slot {
+      height: 60px;
+      width: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border-radius: 8px;
+    }
+
+    .available { background-color: #2ecc71; }
+    .occupied { background-color: #e74c3c; }
+
+    .tab-bar {
+      display: flex;
+      overflow-x: auto;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .tab {
+      padding: 10px;
+      border-radius: 6px;
+      background: #3498db;
+      cursor: pointer;
+      min-width: 120px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .tab.active-tab {
+      background: #2ecc71;
+      font-weight: bold;
+    }
+
+    .profile-img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 10px;
+      border: 3px solid white;
+    }
+
+    .wallet-box, .ai-box {
+      background: rgba(255,255,255,0.1);
+      padding: 15px;
+      margin-top: 15px;
+      border-radius: 10px;
+      text-align:center;
+    }
+
+    .wallet-balance {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 5px 0;
+      color: #2ecc71;
+    }
+  </style>
+</head>
+<body>
+
+<!-- AUTH PAGE -->
+<div id="authPage" class="page active">
+  <div class="card">
+    <h2>🚗 Smart Parking System</h2>
+
+    <div id="loginForm">
+      <h3>Login</h3>
+      <input type="email" id="loginEmail" placeholder="Email">
+      <input type="password" placeholder="Password">
+      <button onclick="login()">Login</button>
+      <button class="secondary-btn" onclick="showRegister()">Create New Account</button>
+    </div>
+
+    <div id="registerForm" style="display:none;">
+      <h3>Register</h3>
+      <input type="text" id="regName" placeholder="Full Name">
+      <input type="email" id="regEmail" placeholder="Email">
+      <input type="password" placeholder="Password">
+      <button onclick="register()">Register</button>
+      <button class="secondary-btn" onclick="showLogin()">Already have account? Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<div id="mainApp" style="display:none;">
+  <div class="nav">
+    <button onclick="go('homePage')">🏠 Home</button>
+    <button onclick="go('cityPage')">🌆 City</button>
+    <button onclick="go('areaPage')">📍 Areas</button>
+    <button onclick="go('parkingPage')">🅿 Parking</button>
+    <button onclick="go('settingsPage')">⚙ Settings</button>
+    <button onclick="go('profilePage')">👤 Profile</button>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="homePage" class="page">
+  <h2>Dynamic Smart Parking System</h2>
+  <p>Find smart parking slots using AI powered real-time analysis.</p>
+  
+  <!-- AI Prediction Section -->
+  <div class="card">
+    <h3>🤖 AI Parking Prediction</h3>
+    <p>Get real‑time predicted availability using AI.</p>
+    <button onclick="aiPredict()">Check AI Prediction</button>
+    <p id="aiResult" style="margin-top:10px;font-weight:bold;"></p>
+  </div>
+
+  <!-- Digital Wallet Section -->
+  <div class="card">
+    <h3>💳 Digital Wallet</h3>
+    <p>Current Balance: <b>₹<span id="walletBalance">300</span></b></p>
+    <button onclick="addMoney()">Add Money</button>
+    <button class="secondary-btn" onclick="payNow()">Make Payment</button>
+    <p id="walletMsg" style="margin-top:10px;font-weight:bold;"></p>
+  </div>
+
+  <img style="max-width:100%;border-radius:10px;margin-top:10px;"
+       src="https://images.unsplash.com/photo-1503376780353-7e6692767b70">
+</div>
+
+<!-- CITY -->
+<div id="cityPage" class="page">
+  <h2>Select Metropolitan City</h2>
+  <div class="card">
+    <button onclick="selectCity('Hyderabad')">Hyderabad</button>
+    <button onclick="selectCity('Delhi')">Delhi</button>
+    <button onclick="selectCity('Mumbai')">Mumbai</button>
+    <button onclick="selectCity('Bangalore')">Bangalore</button>
+    <p id="selectedCity"></p>
+  </div>
+</div>
+
+<!-- AREAS WITH TABS -->
+<div id="areaPage" class="page">
+  <h2>Parking Options in Area</h2>
+  <p id="areaCity"></p>
+
+  <div class="tab-bar">
+    <div class="tab active-tab" onclick="selectTab(this,'ev')">⚡ EV Charging</div>
+    <div class="tab" onclick="selectTab(this,'2w')">🛵 2-Wheeler</div>
+    <div class="tab" onclick="selectTab(this,'4w')">🚗 4-Wheeler</div>
+    <div class="tab" onclick="selectTab(this,'cctv')">📷 CCTV Area</div>
+    <div class="tab" onclick="selectTab(this,'price')">💰 Price</div>
+    <div class="tab" onclick="selectTab(this,'distance')">📍 Distance</div>
+  </div>
+
+  <div class="card">
+    <p id="tabContent">⚡ EV Charging slots available: 6</p>
+  </div>
+</div>
+
+<!-- PARKING -->
+<div id="parkingPage" class="page">
+  <h2>Parking Slots</h2>
+  <p id="parkingCity"></p>
+  <div class="grid" id="slotGrid"></div>
+
+  <div class="card">
+    <label>Select Parking Time</label>
+    <select>
+      <option>30 Minutes</option>
+      <option>1 Hour</option>
+      <option>2 Hours</option>
+    </select>
+    <button onclick="extendTime()">Extend Parking Time</button>
+    <p id="extendMsg"></p>
+  </div>
+
+  <p>🟢 Available | 🔴 Occupied</p>
+</div>
+
+<!-- SETTINGS -->
+<div id="settingsPage" class="page">
+  <h2>Settings</h2>
+  <div class="card">
+    <label>Theme</label>
+    <select>
+      <option>Light</option>
+      <option>Dark</option>
+    </select>
+    <label>Notifications</label>
+    <select>
+      <option>Enabled</option>
+      <option>Disabled</option>
+    </select>
+  </div>
+</div>
+
+<!-- PROFILE -->
+<div id="profilePage" class="page">
+  <h2>User Profile</h2>
+  <div class="card">
+    <img class="profile-img" src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1" alt="Profile">
+    <p><b>Name:</b> <span id="profileName"></span></p>
+    <p><b>Email:</b> <span id="profileEmail"></span></p>
+    <p><b>Vehicle No:</b> TS09AB1234</p>
+  </div>
+</div>
+
+<script>
+  let currentCity = "";
+  let wallet = 200;
+
+  function setBg(page) {
+    const bg = {
+      homePage: "photo-1503376780353-7e6692767b70",
+      cityPage: "photo-1500530855697-b586d89ba3ee",
+      areaPage: "photo-1496560736447-4f7c639b8a29",
+      parkingPage: "photo-1519003722824-194d4455a60c",
+      settingsPage: "photo-1557683316-973673baf926",
+      profilePage: "photo-1507003211169-0a1dd7228f2d"
+    };
+    document.body.style.backgroundImage =
+      "url('https://images.unsplash.com/" + bg[page] + "')";
+  }
+
+  function showRegister() {
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("registerForm").style.display = "block";
+  }
+
+  function showLogin() {
+    document.getElementById("registerForm").style.display = "none";
+    document.getElementById("loginForm").style.display = "block";
+  }
+
+  function login() {
+    const email = document.getElementById("loginEmail").value;
+    if (!email) {
+      alert("Enter email to login");
+      return;
+    }
+    startApp("User");
+  }
+
+  function register() {
+    const name = document.getElementById("regName").value;
+    const email = document.getElementById("regEmail").value;
+    if (!name || !email) {
+      alert("Fill all fields");
+      return;
+    }
+    startApp(name);
+  }
+
+  function startApp(name) {
+    document.getElementById("authPage").classList.remove("active");
+    document.getElementById("mainApp").style.display = "block";
+
+    document.getElementById("profileName").innerText = name;
+    document.getElementById("profileEmail").innerText =
+      document.getElementById("regEmail").value ||
+      document.getElementById("loginEmail").value;
+
+    go("homePage");
+  }
+
+  function go(page) {
+    const pages = [
+      "homePage","cityPage","areaPage",
+      "parkingPage","settingsPage","profilePage"
+    ];
+    pages.forEach(p => {
+      const el = document.getElementById(p);
+      if (el) el.classList.remove("active");
+    });
+    document.getElementById(page).classList.add("active");
+    setBg(page);
+    if (page === "parkingPage") generateSlots();
+    if (page === "areaPage")
+      document.getElementById("areaCity").innerText =
+        "Selected City: " + currentCity;
+  }
+
+  function selectCity(city) {
+    currentCity = city;
+    document.getElementById("selectedCity").innerText =
+      "Selected City: " + city;
+    document.getElementById("parkingCity").innerText =
+      "City: " + city;
+    go("areaPage");
+  }
+
+  function generateSlots() {
+    const grid = document.getElementById("slotGrid");
+    grid.innerHTML = "";
+    for (let i = 1; i <= 20; i++) {
+      const d = document.createElement("div");
+      d.classList.add("slot");
+      d.classList.add(Math.random() > 0.5 ? "available" : "occupied");
+      d.innerText = i;
+      grid.appendChild(d);
+    }
+  }
+
+  function extendTime() {
+    document.getElementById("extendMsg").innerText =
+      "✅ Parking time extended successfully!";
+  }
+
+  function selectTab(el, type) {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active-tab"));
+    el.classList.add("active-tab");
+
+    const data = {
+      ev: "⚡ EV Charging slots available: 6",
+      "2w": "🛵 2-Wheeler slots available: 12",
+      "4w": "🚗 4-Wheeler slots available: 8",
+      cctv: "📷 CCTV-covered slots available: 5",
+      price: "💰 Price: ₹20/hour",
+      distance: "📍 Distance: 0.8 km away"
+    };
+    document.getElementById("tabContent").innerText = data[type];
+  }
+
+  function generateAISuggestion() {
+    const suggestions = [
+      "Best Slot: A12 — Closest to entrance.",
+      "Best Slot: B7 — Cheapest and nearest.",
+      "Best Slot: C3 — EV charging available.",
+      "Best Slot: D11 — Lowest crowd area.",
+      "Best Slot: A5 — 2-Wheeler priority lane."
+    ];
+    let s = suggestions[Math.floor(Math.random() * suggestions.length)];
+    document.getElementById("aiSuggestion").innerText = "🤖 AI Suggestion: " + s;
+  }
+
+  function addMoney() {
+    wallet += 100;
+    document.getElementById("walletBalance").innerText = "₹" + wallet;
+    document.getElementById("walletMsg").innerText = "₹100 added to wallet!";
+  }
+
+  function payParking() {
+    if (wallet >= 20) {
+      wallet -= 20;
+      document.getElementById("walletBalance").innerText = "₹" + wallet;
+      document.getElementById("walletMsg").innerText = "Payment successful! ₹20 deducted.";
+    } else {
+      document.getElementById("walletMsg").innerText = "Not enough balance!";
+    }
+  }
+</script>
+
+</body>
+</html>
